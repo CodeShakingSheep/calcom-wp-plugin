@@ -35,6 +35,9 @@ class Embed
                     $output = '<span id="calcom-embed-link" data-cal-link="' . esc_attr($atts['url']) . '">' . esc_attr($atts['text']) . '</span>';
                     $output .= '<script>var customCalUrl = "' . $atts['customCalInstance'] . '";</script>';
                     break;
+                case 3:
+                    $output = $this->get_floating_popup_embed_script($atts['url'], $atts['text'], $atts['customCalInstance']);
+                    break;
                 default:
                     $output = '<div id="calcom-embed"></div>';
                     $output .= $this->get_inline_embed_script($atts['url'], $atts['customCalInstance']);
@@ -63,6 +66,33 @@ class Embed
                     elementOrSelector: selector,
                     calLink: "' . $url . '"
                 });
+            });
+        </script>';
+
+        return $script;
+    }
+
+    /**
+     * Adds floating-popup embed JS
+     * 
+     * @param $url Booking link
+	 * @param $text Button text
+     * @param $custom_cal_url Custom cal.com URL (if self-hosted instance is used)
+     * @return string
+     */
+    public function get_floating_popup_embed_script($url, $text, $custom_cal_url): string
+    {
+        $button_text = strlen($text) > 0 ? '"buttonText":"' . $text . '"' : '';
+        $script = '<script>
+            var customCalUrl = "' . $custom_cal_url . '";
+            addEventListener("DOMContentLoaded", (event) => {
+				Cal("floatingButton", {"calLink":"' . $url . '"' . (strlen($button_text) == 0 ? "" : "," . $button_text) . '});
+                if(customCalUrl.length == 0) {
+                    Cal("floatingButton", {"calLink":"' . $url . '"});
+                }
+                else {
+                    Cal("floatingButton", {"calLink":"' . $url . '","calOrigin":customCalUrl});
+                }
             });
         </script>';
 
